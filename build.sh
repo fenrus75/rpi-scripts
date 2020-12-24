@@ -63,12 +63,25 @@ cp carbidemotion-522.deb image/tmp/discard
 echo "#!/bin/sh" > image/var/lib/dpkg/info/pypy.prerm
 echo "exit 0" >> image/var/lib/dpkg/info/pypy.prerm
 chmod a+x image/var/lib/dpkg/info/pypy.prerm
+
+
+#
+# Add some key software we want in the image
+
+# usbmount will let us auto mount USB sticks
+chroot image apt-get install -y usbmount udisks2
+
+# Samba for network shares
+DEBIAN_FRONTEND=noninteractive chroot image apt-get install -y --assume-yes samba
+# and some things we don't want auto-removes
+chroot image apt-mark manual udisks2 samba
+
 #
 # Remove some extra software not needed for a CNC controller
 # we do this in three steps to recursively remove these, as well as their configuration leftovers
 #
-LIST="chromium-codecs-ffmpeg-extra ffmpeg chromium-browser chromium-browser-l10n vlc alacarte dillo fio geany geany-common gpicview libass9 libavcodec58 libavfilter7 libavformat58 libavresample4 libavutil56 libbluray2 libcodec2-0.8.1 vlc-plugin-base vlc-plugin-*  thonny rpi-chromium-mods realvnc-vnc-server libmp3lame0 gcc-8 cups manpages-dev libc6-dev tk8.6-blt2.5  pypy cups-daemon "
-chroot image apt-mark manual udisks2 samba
+LIST="chromium-codecs-ffmpeg-extra ffmpeg chromium-browser chromium-browser-l10n vlc alacarte dillo fio geany geany-common gpicview libass9 libavcodec58 libavfilter7 libavformat58 libavresample4 libavutil56 libbluray2 libcodec2-0.8.1 vlc-plugin-base vlc-plugin-*  thonny rpi-chromium-mods realvnc-vnc-server libmp3lame0 gcc-8 cups manpages-dev libc6-dev tk8.6-blt2.5  pypy cups-daemon git gsfonts  ghostscript libjs-sphinxdoc libjs-jquery libjs-underscore libraspberrypi-doc rpd-wallpaper libc6-dbg poppler-data poppler-utils libsane libpoppler82 python-numpy cups-common"
+
 chroot image apt autoremove -q -y $LIST
 chroot image apt purge -q -y $LIST
 chroot image apt autoremove -q -y
@@ -81,14 +94,6 @@ rm -rf image/usr/lib/pypy/
 
 chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-522.deb 
 
-#
-# Add (back) some key software (the previous purge might have deleted some of it, but that's ok, this way we get it clean and complete)
-
-# usbmount will let us auto mount USB sticks
-chroot image apt-get install -y usbmount udisks2
-
-# Samba for network shares
-DEBIAN_FRONTEND=noninteractive chroot image apt-get install -y --assume-yes samba
 
 
 
