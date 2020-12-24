@@ -61,7 +61,7 @@ cp carbidemotion-522.deb image/tmp/discard
 # Remove some extra software not needed for a CNC controller
 # we do this in three steps to recursively remove these, as well as their configuration leftovers
 #
-LIST="chromium-codecs-ffmpeg-extra ffmpeg chromium-browser chromium-browser-l10n vlc alacarte dillo fio geany geany-common gpicview libass9 libavcodec58 libavfilter7 libavformat58 libavresample4 libavutil56 libbluray2 libcodec2-0.8.1 vlc-plugin-base vlc-plugin-notify vlc-plugin-qt vlc-plugin vlc-plugin-skins2 vlc-plugin-video-output vlc-plugin-video-splitter vlc-plugin-visualization thonny rpi-chromium-mods realvnc-vnc-server libmp3lame0 gcc-8 cups manpages-dev libc6-dev tk8.6-blt2.5 "
+LIST="chromium-codecs-ffmpeg-extra ffmpeg chromium-browser chromium-browser-l10n vlc alacarte dillo fio geany geany-common gpicview libass9 libavcodec58 libavfilter7 libavformat58 libavresample4 libavutil56 libbluray2 libcodec2-0.8.1 vlc-plugin-base vlc-plugin-*  thonny rpi-chromium-mods realvnc-vnc-server libmp3lame0 gcc-8 cups manpages-dev libc6-dev tk8.6-blt2.5 binutils "
 chroot image apt-mark manual udisks2
 chroot image apt remove -q -y $LIST
 chroot image apt purge -q -y $LIST
@@ -80,7 +80,7 @@ chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-522.deb
 chroot image apt-get install -y usbmount udisks2
 
 # Samba for network shares
-chroot image apt-get install -y samba
+chroot image apt-get install -y --assume-yes samba
 
 
 
@@ -121,7 +121,9 @@ rm -f image/tmp/full
 
 # and unmount / remove the loop device
 
-umount image
-sync
-losetup -d $LOOP
-zip -9 rpi-carbidemotion.zip $IMG
+if [ ! -e KEEP ] ; then
+	umount image
+	sync
+	losetup -d $LOOP
+	zip -9 rpi-carbidemotion.zip $IMG
+fi
