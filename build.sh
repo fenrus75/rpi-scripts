@@ -1,0 +1,91 @@
+#!/bin/bash
+
+#
+# This script needs qemu-user-static (to run ARM binaries on x86) as well as curl and zip/unzip
+#
+apt-get install -y -q qemu-user-static curl unzip zip
+
+#
+# Input files
+#
+ZIP=2020-12-02-raspios-buster-armhf.zip
+IMG=2020-12-02-raspios-buster-armhf.img
+LOOP=/dev/loop7
+LOOPpart=/dev/loop7p2
+# download the OS image file as zip 
+if [ ! -e $ZIP ] ; then
+	curl -L -O https://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2020-12-04/$ZIP
+fi
+
+#... and unzip
+if [ ! -e $IMG ] ; then
+	unzip $ZIP
+fi
+if [ ! -e carbidemotion-522.deb ] ; then
+	curl -O -L http://carbide3d.com/dl/pi/carbidemotion-522.deb
+fi
+
+# we need the loopback devices to support partitioned devices, so force this on
+modprobe loop max_part=31
+
+# cleanup in case a previous run aborted
+
+umount -l image &> /dev/null
+rmdir image &> /dev/null
+losetup -d $LOOP
+
+
+# set up the file as a loopback device, so that we can mount it
+losetup $LOOP $IMG
+# scan it for partitions, since it's a full disk image with a partition table, not just a bare image
+partx $LOOP
+# mont partition 2 (partition 1 is the bootloder
+mkdir image &> /dev/null
+mount $LOOPpart image
+# we need "qmu-arm-static in the image for the chroots below to work
+
+cp /usr/bin/qemu-arm-static image/usr/bin/
+
+# copy the carbide motion file into the image
+mkdir -p image/tmp/discard
+cp carbidemotion-522.deb image/tmp/discard
+#
+# Remove some extra software not needed for a CNC controller
+# we do this in three steps to recursively remove these, as well as their configuration leftovers
+#
+LIST="chromium-codecs-ffmpeg-extra ffmpeg chromium-browser chromium-browser-l10n vlc alacarte dillo fio geany geany-common gpicview libass9 libavcodec58 libavfilter7 libavformat58 libavresample4 libavutil56 libbluray2 libcodec2-0.8.1 vlc-plugin-base vlc-plugin-notify vlc-plugin-qt vlc-plugin-samba vlc-plugin-skins2 vlc-plugin-video-output vlc-plugin-video-splitter vlc-plugin-visualization thonny rpi-chromium-mods realvnc-vnc-server libmp3lame0 python python2 piwiz gcc-8 cups manpages-dev libc6-dev tk8.6-blt2.5 "
+chroot image apt remove -q -y $LIST
+chroot image apt purge -q -y $LIST
+chroot image apt autoremove -q -y 
+
+#
+# Install carbide motion
+#
+
+chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-522.deb 
+# usbmount will let us auto mount USB sticks
+chroot image apt-get install -y usbmount
+# clean the download cache
+chroot image apt-get clean
+
+# final configuration, autostart CM
+cp image/usr/share/applications/carbidemotion.desktop image/etc/xdg/autostart
+
+#
+# reporting and cleanup
+#
+chroot image dpkg --list > list
+rm -f image/tmp/discard/*deb
+rm -f image/usr/bin/qemu-arm-static
+
+#
+# zero out any empty space in the filesystem so that it zips up well
+#
+dd if=/dev/zero of=image/tmp/discard/full &> /dev/null
+rm -f image/tmp/discard/full 
+
+# and unmount / remove the loop device
+
+#umount image
+#sync
+#losetup -d $LOOP
