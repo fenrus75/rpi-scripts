@@ -57,17 +57,25 @@ cp /usr/bin/qemu-arm-static image/usr/bin/
 # copy the carbide motion file into the image
 mkdir -p image/tmp/discard
 cp carbidemotion-522.deb image/tmp/discard
+
+# workaround, pypy refuses to remove in a chroot 
+
+echo "#!/bin/sh" > image/var/lib/dpkg/info/pypy.prerm
+echo "exit 0" >> image/var/lib/dpkg/info/pypy.prerm
+chmod a+x image/var/lib/dpkg/info/pypy.prerm
 #
 # Remove some extra software not needed for a CNC controller
 # we do this in three steps to recursively remove these, as well as their configuration leftovers
 #
-LIST="chromium-codecs-ffmpeg-extra ffmpeg chromium-browser chromium-browser-l10n vlc alacarte dillo fio geany geany-common gpicview libass9 libavcodec58 libavfilter7 libavformat58 libavresample4 libavutil56 libbluray2 libcodec2-0.8.1 vlc-plugin-base vlc-plugin-*  thonny rpi-chromium-mods realvnc-vnc-server libmp3lame0 gcc-8 cups manpages-dev libc6-dev tk8.6-blt2.5 binutils "
-chroot image apt-mark manual udisks2
-chroot image apt remove -q -y $LIST
+LIST="chromium-codecs-ffmpeg-extra ffmpeg chromium-browser chromium-browser-l10n vlc alacarte dillo fio geany geany-common gpicview libass9 libavcodec58 libavfilter7 libavformat58 libavresample4 libavutil56 libbluray2 libcodec2-0.8.1 vlc-plugin-base vlc-plugin-*  thonny rpi-chromium-mods realvnc-vnc-server libmp3lame0 gcc-8 cups manpages-dev libc6-dev tk8.6-blt2.5  pypy cups-daemon "
+chroot image apt-mark manual udisks2 samba
+chroot image apt autoremove -q -y $LIST
 chroot image apt purge -q -y $LIST
-chroot image apt autoremove -q -y 
+chroot image apt autoremove -q -y
 
-#
+
+rm -rf image/usr/lib/pypy/
+
 # Install carbide motion
 #
 
@@ -80,7 +88,7 @@ chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-522.deb
 chroot image apt-get install -y usbmount udisks2
 
 # Samba for network shares
-chroot image apt-get install -y --assume-yes samba
+DEBIAN_FRONTEND=noninteractive chroot image apt-get install -y --assume-yes samba
 
 
 
