@@ -61,7 +61,8 @@ cp carbidemotion-522.deb image/tmp/discard
 # Remove some extra software not needed for a CNC controller
 # we do this in three steps to recursively remove these, as well as their configuration leftovers
 #
-LIST="chromium-codecs-ffmpeg-extra ffmpeg chromium-browser chromium-browser-l10n vlc alacarte dillo fio geany geany-common gpicview libass9 libavcodec58 libavfilter7 libavformat58 libavresample4 libavutil56 libbluray2 libcodec2-0.8.1 vlc-plugin-base vlc-plugin-notify vlc-plugin-qt vlc-plugin-samba vlc-plugin-skins2 vlc-plugin-video-output vlc-plugin-video-splitter vlc-plugin-visualization thonny rpi-chromium-mods realvnc-vnc-server libmp3lame0 python python2 gcc-8 cups manpages-dev libc6-dev tk8.6-blt2.5 "
+LIST="chromium-codecs-ffmpeg-extra ffmpeg chromium-browser chromium-browser-l10n vlc alacarte dillo fio geany geany-common gpicview libass9 libavcodec58 libavfilter7 libavformat58 libavresample4 libavutil56 libbluray2 libcodec2-0.8.1 vlc-plugin-base vlc-plugin-notify vlc-plugin-qt vlc-plugin vlc-plugin-skins2 vlc-plugin-video-output vlc-plugin-video-splitter vlc-plugin-visualization thonny rpi-chromium-mods realvnc-vnc-server libmp3lame0 gcc-8 cups manpages-dev libc6-dev tk8.6-blt2.5 "
+chroot image apt-mark manual udisks2
 chroot image apt remove -q -y $LIST
 chroot image apt purge -q -y $LIST
 chroot image apt autoremove -q -y 
@@ -71,8 +72,19 @@ chroot image apt autoremove -q -y
 #
 
 chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-522.deb 
+
+#
+# Add (back) some key software (the previous purge might have deleted some of it, but that's ok, this way we get it clean and complete)
+
 # usbmount will let us auto mount USB sticks
-chroot image apt-get install -y usbmount
+chroot image apt-get install -y usbmount udisks2
+
+# Samba for network shares
+chroot image apt-get install -y samba
+
+
+
+
 # clean the download cache
 chroot image apt-get clean
 
@@ -85,15 +97,31 @@ cp image/usr/share/applications/carbidemotion.desktop image/etc/xdg/autostart
 chroot image dpkg --list > list
 rm -f image/tmp/discard/*deb
 rm -f image/usr/bin/qemu-arm-static
+rmdir image/tmp/discard
+
+
+#
+# Now that we're done with the content of the image, time to optimize it for burning/etc
+#
+
+#
+# Resize FS tricks; this moves all content to the beginning of the image
+#
+umount image
+e2fsck -f $LOOPpart
+resize2fs -M $LOOPpart
+resize2fs $LOOPpart
+mount $LOOPpart image
 
 #
 # zero out any empty space in the filesystem so that it zips up well
 #
-dd if=/dev/zero of=image/tmp/discard/full &> /dev/null
-rm -f image/tmp/discard/full 
+dd if=/dev/zero of=image/tmp/full &> /dev/null
+rm -f image/tmp/full 
 
 # and unmount / remove the loop device
 
-#umount image
-#sync
-#losetup -d $LOOP
+umount image
+sync
+losetup -d $LOOP
+zip -9 rpi-carbidemotion.zip $IMG
