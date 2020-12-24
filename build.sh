@@ -79,8 +79,17 @@ chroot image apt-mark manual udisks2 samba
 #
 # Remove some extra software not needed for a CNC controller
 # we do this in three steps to recursively remove these, as well as their configuration leftovers
+
+BROWSERS="chromium-browser chromium-browser-l10n dillo rpi-chromium-mods "
+CODECS="chromium-codecs-ffmpeg-extra ffmpeg vlc libavcodec58 libavfilter7 libavformat58 libavresample4 libavutil56 libbluray2 libcodec2-0.8.1 vlc-plugin-base vlc-plugin-* libmp3lame0  "
+PRINTING="cups gsfonts  ghostscript cups-daemon cups-common  poppler-data poppler-utils  libpoppler82 libsane"
+DEVTOOLS="fio gcc-8 manpages-dev libc6-dev tk8.6-blt2.5 git libc6-dbg libjs-sphinxdoc libjs-jquery libjs-underscore libraspberrypi-doc "
+PYTHONMISC="pypy python-numpy"
+GUIMISC="geany geany-common gpicview realvnc-vnc-server rpd-wallpaper"
 #
-LIST="chromium-codecs-ffmpeg-extra ffmpeg chromium-browser chromium-browser-l10n vlc alacarte dillo fio geany geany-common gpicview libass9 libavcodec58 libavfilter7 libavformat58 libavresample4 libavutil56 libbluray2 libcodec2-0.8.1 vlc-plugin-base vlc-plugin-*  thonny rpi-chromium-mods realvnc-vnc-server libmp3lame0 gcc-8 cups manpages-dev libc6-dev tk8.6-blt2.5  pypy cups-daemon git gsfonts  ghostscript libjs-sphinxdoc libjs-jquery libjs-underscore libraspberrypi-doc rpd-wallpaper libc6-dbg poppler-data poppler-utils libsane libpoppler82 python-numpy cups-common"
+LIST="$CODECS $BROWSERS $DEVTOOLS $PRINTING $PYTHONMISC $GUIMISC alacarte libass9 thonny   "
+
+echo "List is %LIST"
 
 chroot image apt autoremove -q -y $LIST
 chroot image apt purge -q -y $LIST
@@ -101,8 +110,22 @@ chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-522.deb
 # clean the download cache
 chroot image apt-get clean
 
-# final configuration, autostart CM
+# final configuration, 
+
+# autostart CM
 cp image/usr/share/applications/carbidemotion.desktop image/etc/xdg/autostart
+
+# samba config
+cp smb.conf image/etc/samba/smb.conf
+mkdir image/gcode
+chown 1000.1000 image/gcode
+chroot image systemctl enable smbd
+
+# mount namespace
+
+mkdir -p /etc/systemd/system/systemd-udevd.service.d/
+echo "[Service}" > /etc/systemd/system/systemd-udevd.service.d/myoverride.conf
+echo "MountFlags=shared" >> /etc/systemd/system/systemd-udevd.service.d/myoverride.conf
 
 #
 # reporting and cleanup
