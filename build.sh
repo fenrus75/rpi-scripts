@@ -1,5 +1,13 @@
 #!/bin/bash
 
+
+#
+# This script downloads (and caches) a raspberry pi OS image and does some basic modifications to it.
+# RIght now, this script needs root privileges (sorry; WIP) and kind of assumes to run on a Debian
+# based Linux OS... it can run on x86 just fine (it will use qemu to emulate running ARM binaries
+# when needed) but should also work on the Raspberry PI itself.
+#
+
 #
 # This script needs qemu-user-static (to run ARM binaries on x86) as well as curl and zip/unzip
 #
@@ -53,7 +61,7 @@ cp carbidemotion-522.deb image/tmp/discard
 # Remove some extra software not needed for a CNC controller
 # we do this in three steps to recursively remove these, as well as their configuration leftovers
 #
-LIST="chromium-codecs-ffmpeg-extra ffmpeg chromium-browser chromium-browser-l10n vlc alacarte dillo fio geany geany-common gpicview libass9 libavcodec58 libavfilter7 libavformat58 libavresample4 libavutil56 libbluray2 libcodec2-0.8.1 vlc-plugin-base vlc-plugin-notify vlc-plugin-qt vlc-plugin-samba vlc-plugin-skins2 vlc-plugin-video-output vlc-plugin-video-splitter vlc-plugin-visualization thonny rpi-chromium-mods realvnc-vnc-server libmp3lame0 python python2 piwiz gcc-8 cups manpages-dev libc6-dev tk8.6-blt2.5 "
+LIST="chromium-codecs-ffmpeg-extra ffmpeg chromium-browser chromium-browser-l10n vlc alacarte dillo fio geany geany-common gpicview libass9 libavcodec58 libavfilter7 libavformat58 libavresample4 libavutil56 libbluray2 libcodec2-0.8.1 vlc-plugin-base vlc-plugin-notify vlc-plugin-qt vlc-plugin-samba vlc-plugin-skins2 vlc-plugin-video-output vlc-plugin-video-splitter vlc-plugin-visualization thonny rpi-chromium-mods realvnc-vnc-server libmp3lame0 python python2 gcc-8 cups manpages-dev libc6-dev tk8.6-blt2.5 "
 chroot image apt remove -q -y $LIST
 chroot image apt purge -q -y $LIST
 chroot image apt autoremove -q -y 
