@@ -89,8 +89,6 @@ GUIMISC="geany geany-common gpicview realvnc-vnc-server rpd-wallpaper"
 #
 LIST="$CODECS $BROWSERS $DEVTOOLS $PRINTING $PYTHONMISC $GUIMISC alacarte libass9 thonny   "
 
-echo "List is %LIST"
-
 chroot image apt autoremove -q -y $LIST
 chroot image apt purge -q -y $LIST
 chroot image apt autoremove -q -y
@@ -114,6 +112,9 @@ chroot image apt-get clean
 
 # autostart CM
 cp image/usr/share/applications/carbidemotion.desktop image/etc/xdg/autostart
+
+# rc.local bootup script replacement
+cp rc.local image/etc/rc.local
 
 # samba config
 cp smb.conf image/etc/samba/smb.conf
