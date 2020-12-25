@@ -18,6 +18,7 @@ apt-get install -y -q qemu-user-static curl unzip zip
 #
 ZIP=2020-12-02-raspios-buster-armhf.zip
 IMG=2020-12-02-raspios-buster-armhf.img
+IMG2=rpi-carbidemotion.img
 LOOP=/dev/loop7
 LOOPpart=/dev/loop7p2
 # download the OS image file as zip 
@@ -29,6 +30,8 @@ fi
 if [ ! -e $IMG ] ; then
 	unzip $ZIP
 fi
+
+
 if [ ! -e carbidemotion-522.deb ] ; then
 	curl -O -L http://carbide3d.com/dl/pi/carbidemotion-522.deb
 fi
@@ -42,9 +45,13 @@ umount -l image &> /dev/null
 rmdir image &> /dev/null
 losetup -d $LOOP
 
+# work on a copy of the img file so that we can restart prestine each time without having to unzip
+
+cp $IMG $IMG2
+
 
 # set up the file as a loopback device, so that we can mount it
-losetup $LOOP $IMG
+losetup $LOOP $IMG2
 # scan it for partitions, since it's a full disk image with a partition table, not just a bare image
 partx $LOOP
 # mont partition 2 (partition 1 is the bootloder
@@ -80,11 +87,16 @@ chmod a+x image/var/lib/dpkg/info/pypy.prerm
 
 # usbmount will let us auto mount USB sticks
 chroot image apt-get install -y usbmount udisks2
-
 # Samba for network shares
 DEBIAN_FRONTEND=noninteractive chroot image apt-get install -y --assume-yes samba
-# and some things we don't want auto-removes
+# and mark some things we don't want auto-removed
 chroot image apt-mark manual udisks2 samba
+
+#
+# Install carbide motion
+#
+chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-522.deb 
+
 
 #
 # Remove some extra software not needed for a CNC controller
@@ -106,13 +118,11 @@ chroot image apt autoremove -q -y
 
 rm -rf image/usr/lib/pypy/
 
+
+#
 # Install carbide motion
 #
-
 chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-522.deb 
-
-
-
 
 
 # clean the download cache
@@ -135,9 +145,9 @@ chroot image systemctl enable smbd
 
 # mount namespace
 
-mkdir -p /etc/systemd/system/systemd-udevd.service.d/
-echo "[Service}" > /etc/systemd/system/systemd-udevd.service.d/myoverride.conf
-echo "MountFlags=shared" >> /etc/systemd/system/systemd-udevd.service.d/myoverride.conf
+mkdir -p image/etc/systemd/system/systemd-udevd.service.d/
+echo "[Service}" > image/etc/systemd/system/systemd-udevd.service.d/myoverride.conf
+echo "MountFlags=shared" >> image/etc/systemd/system/systemd-udevd.service.d/myoverride.conf
 
 #
 # reporting and cleanup
@@ -174,5 +184,5 @@ if [ ! -e KEEP ] ; then
 	umount image
 	sync
 	losetup -d $LOOP
-	zip -9 rpi-carbidemotion.zip $IMG
+	zip -9 rpi-carbidemotion.zip $IMG2
 fi
