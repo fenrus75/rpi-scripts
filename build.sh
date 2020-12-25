@@ -180,7 +180,7 @@ if [ ! -e NOSHRINK ]; then
 	# shrink the FS to the minimum size
 	resize2fs -M $LOOPpart
 	# adjust the partition table
-	yes | parted [---pretend-input-tty $LOOP resizepart 2 2400M
+	yes | parted ---pretend-input-tty $LOOP resizepart 2 2400M
 	# stop the loop device
 	losetup -d $LOOP
 	# reduce the size of the file
