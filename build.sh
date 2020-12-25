@@ -11,7 +11,7 @@
 #
 # This script needs qemu-user-static (to run ARM binaries on x86) as well as curl and zip/unzip
 #
-apt-get install -y -q qemu-user-static curl unzip zip
+apt-get install -y -q qemu-user-static curl unzip zip parted coreutils
 
 #
 # Input files
@@ -111,10 +111,10 @@ chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-522.deb
 BROWSERS="chromium-browser chromium-browser-l10n dillo rpi-chromium-mods "
 CODECS="chromium-codecs-ffmpeg-extra ffmpeg vlc libavcodec58 libavfilter7 libavformat58 libavresample4 libavutil56 libbluray2 libcodec2-0.8.1 vlc-plugin-base vlc-plugin-* libmp3lame0  "
 PRINTING="cups gsfonts  ghostscript cups-daemon cups-common  poppler-data poppler-utils  libpoppler82 libsane cups-pk-helper system-config-printer avahi-daemon "
-DEVTOOLS="fio gcc-8 manpages-dev libc6-dev tk8.6-blt2.5 git libc6-dbg libjs-sphinxdoc libjs-jquery libjs-underscore libraspberrypi-doc gdb dmidecode dpkg-dev gdbm-l10n "
+DEVTOOLS="fio gcc-8 manpages-dev libc6-dev tk8.6-blt2.5 git libc6-dbg libjs-sphinxdoc libjs-jquery libjs-underscore libraspberrypi-doc gdb dmidecode gdbm-l10n pkg-config luajit dpkg-dev "
 PYTHONMISC="pypy python-numpy"
-GUIMISC="geany geany-common gpicview realvnc-vnc-server rpd-wallpaper scrot giblib1 gtk2-engines-clearlookspix gui-pkinst "
-DOCS="debian-reference-common debian-reference-en"
+GUIMISC="geany geany-common gpicview realvnc-vnc-server rpd-wallpaper scrot giblib1 gtk2-engines-clearlookspix gui-pkinst libmikmod3 plymouth rpd-plym-splash v4l-utils "
+DOCS="debian-reference-common debian-reference-en rp-bookshelf"
 #
 LIST="$CODECS $BROWSERS $DEVTOOLS $PRINTING $PYTHONMISC $GUIMISC $DOCS alacarte libass9 thonny   "
 
@@ -132,8 +132,6 @@ rm -rf image/usr/lib/pypy/
 chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-522.deb 
 
 
-# clean the download cache
-chroot image apt-get clean
 
 # final configuration, 
 
@@ -143,6 +141,9 @@ cp carbidemotion.desktop image/etc/xdg/autostart
 
 # rc.local bootup script replacement
 cp rc.local image/etc/rc.local
+
+# clean the download cache
+chroot image apt-get clean
 
 # samba config
 cp smb.conf image/etc/samba/smb.conf
@@ -173,11 +174,24 @@ rmdir image/tmp/discard
 #
 # Resize FS tricks; this moves all content to the beginning of the image
 #
-umount image
-e2fsck -f $LOOPpart
-resize2fs -M $LOOPpart
-resize2fs $LOOPpart
-mount $LOOPpart image
+if [ ! -e NOSHRINK ]; then
+	umount image
+	e2fsck -f $LOOPpart
+	# shrink the FS to the minimum size
+	resize2fs -M $LOOPpart
+	# adjust the partition table
+	yes | parted [---pretend-input-tty $LOOP resizepart 2 2400M
+	# stop the loop device
+	losetup -d $LOOP
+	# reduce the size of the file
+	truncate $IMG2 2450M
+	# and re-establish the devices/mount point
+	losetup $LOOP $IMG2
+	partx $LOOP
+	# fill the whole partition
+	resize2fs $LOOPpart
+	mount $LOOPpart image
+fi
 
 #
 # zero out any empty space in the filesystem so that it zips up well
