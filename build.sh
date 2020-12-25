@@ -93,7 +93,7 @@ chroot image apt-mark manual udisks2 samba
 BROWSERS="chromium-browser chromium-browser-l10n dillo rpi-chromium-mods "
 CODECS="chromium-codecs-ffmpeg-extra ffmpeg vlc libavcodec58 libavfilter7 libavformat58 libavresample4 libavutil56 libbluray2 libcodec2-0.8.1 vlc-plugin-base vlc-plugin-* libmp3lame0  "
 PRINTING="cups gsfonts  ghostscript cups-daemon cups-common  poppler-data poppler-utils  libpoppler82 libsane"
-DEVTOOLS="fio gcc-8 manpages-dev libc6-dev tk8.6-blt2.5 git libc6-dbg libjs-sphinxdoc libjs-jquery libjs-underscore libraspberrypi-doc "
+DEVTOOLS="fio gcc-8 manpages-dev libc6-dev tk8.6-blt2.5 git libc6-dbg libjs-sphinxdoc libjs-jquery libjs-underscore libraspberrypi-doc gdb "
 PYTHONMISC="pypy python-numpy"
 GUIMISC="geany geany-common gpicview realvnc-vnc-server rpd-wallpaper"
 #
