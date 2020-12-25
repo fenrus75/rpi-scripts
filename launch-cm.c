@@ -8,7 +8,7 @@ int main(int argc, char **argv)
         int ret;
         
         ret = access("/etc/xdg/autostart/piwiz.desktop", F_OK);
-        if (ret == 0)
+        if (ret != 0)
             break;
             
         usleep(500000);
