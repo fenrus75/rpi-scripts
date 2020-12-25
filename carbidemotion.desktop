@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Exec=/usr/bin/launch-cm
+Path=/usr/local/bin/
+Name=Carbide Motion (delayed launcher)
+GenericName=Carbide 3D Machine Controller
+Icon=/usr/local/bin/carbidemotion-icon.png
+Terminal=false
+Categories=Graphics;Accessories;X-CNC;

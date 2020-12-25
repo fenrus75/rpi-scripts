@@ -58,6 +58,16 @@ cp /usr/bin/qemu-arm-static image/usr/bin/
 mkdir -p image/tmp/discard
 cp carbidemotion-522.deb image/tmp/discard
 
+#
+# Delayed launcher so that CM does not start until the user is done configuring
+# This invokes GCC inside the image, so needs to be done before GCC is removed
+# below
+#
+cp launch-cm.c image/tmp/
+chroot image gcc -O2 -Wall tmp/launch-cm.c -o /usr/bin/launch-cm
+rm image/tmp/launch-cm.c
+
+
 # workaround, pypy refuses to remove in a chroot 
 
 echo "#!/bin/sh" > image/var/lib/dpkg/info/pypy.prerm
@@ -110,8 +120,9 @@ chroot image apt-get clean
 
 # final configuration, 
 
+
 # autostart CM
-cp image/usr/share/applications/carbidemotion.desktop image/etc/xdg/autostart
+cp carbidemotion.desktop image/etc/xdg/autostart
 
 # rc.local bootup script replacement
 cp rc.local image/etc/rc.local
@@ -134,6 +145,7 @@ echo "MountFlags=shared" >> /etc/systemd/system/systemd-udevd.service.d/myoverri
 chroot image dpkg --list > list
 rm -f image/tmp/discard/*deb
 rm -f image/usr/bin/qemu-arm-static
+rm -f image/home/pi/Bookshelf/000_RPi_BeginnersGuide_DIGITAL.pdf
 rmdir image/tmp/discard
 
 
