@@ -47,7 +47,13 @@ losetup -d $LOOP
 
 # work on a copy of the img file so that we can restart prestine each time without having to unzip
 
-cp $IMG $IMG2
+if [ ! -e KEEP ] ; then
+	cp $IMG $IMG2
+fi
+
+if [ ! -e $IMG2 ] ; then
+	cp $IMG $IMG2
+fi
 
 
 # set up the file as a loopback device, so that we can mount it
@@ -86,11 +92,11 @@ chmod a+x image/var/lib/dpkg/info/pypy.prerm
 # Add some key software we want in the image
 
 # usbmount will let us auto mount USB sticks
-chroot image apt-get install -y usbmount udisks2
+chroot image apt-get install -y usbmount
 # Samba for network shares
 DEBIAN_FRONTEND=noninteractive chroot image apt-get install -y --assume-yes samba
 # and mark some things we don't want auto-removed
-chroot image apt-mark manual udisks2 samba
+chroot image apt-mark manual samba
 
 #
 # Install carbide motion
@@ -104,12 +110,13 @@ chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-522.deb
 
 BROWSERS="chromium-browser chromium-browser-l10n dillo rpi-chromium-mods "
 CODECS="chromium-codecs-ffmpeg-extra ffmpeg vlc libavcodec58 libavfilter7 libavformat58 libavresample4 libavutil56 libbluray2 libcodec2-0.8.1 vlc-plugin-base vlc-plugin-* libmp3lame0  "
-PRINTING="cups gsfonts  ghostscript cups-daemon cups-common  poppler-data poppler-utils  libpoppler82 libsane"
-DEVTOOLS="fio gcc-8 manpages-dev libc6-dev tk8.6-blt2.5 git libc6-dbg libjs-sphinxdoc libjs-jquery libjs-underscore libraspberrypi-doc gdb "
+PRINTING="cups gsfonts  ghostscript cups-daemon cups-common  poppler-data poppler-utils  libpoppler82 libsane cups-pk-helper system-config-printer avahi-daemon "
+DEVTOOLS="fio gcc-8 manpages-dev libc6-dev tk8.6-blt2.5 git libc6-dbg libjs-sphinxdoc libjs-jquery libjs-underscore libraspberrypi-doc gdb dmidecode dpkg-dev gdbm-l10n "
 PYTHONMISC="pypy python-numpy"
-GUIMISC="geany geany-common gpicview realvnc-vnc-server rpd-wallpaper"
+GUIMISC="geany geany-common gpicview realvnc-vnc-server rpd-wallpaper scrot giblib1 gtk2-engines-clearlookspix gui-pkinst "
+DOCS="debian-reference-common debian-reference-en"
 #
-LIST="$CODECS $BROWSERS $DEVTOOLS $PRINTING $PYTHONMISC $GUIMISC alacarte libass9 thonny   "
+LIST="$CODECS $BROWSERS $DEVTOOLS $PRINTING $PYTHONMISC $GUIMISC $DOCS alacarte libass9 thonny   "
 
 chroot image apt autoremove -q -y $LIST
 chroot image apt purge -q -y $LIST
@@ -139,7 +146,7 @@ cp rc.local image/etc/rc.local
 
 # samba config
 cp smb.conf image/etc/samba/smb.conf
-mkdir image/gcode
+mkdir -p image/gcode
 chown 1000.1000 image/gcode
 chroot image systemctl enable smbd
 
