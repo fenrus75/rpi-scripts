@@ -147,15 +147,19 @@ chroot image apt-get clean
 
 # samba config
 cp smb.conf image/etc/samba/smb.conf
-mkdir -p image/gcode
+mkdir -p image/gcode/usb
 chown 1000.1000 image/gcode
 chroot image systemctl enable smbd
 
-# mount namespace
+# mount namespace so that automounting of USB sticks works
 
 mkdir -p image/etc/systemd/system/systemd-udevd.service.d/
-echo "[Service}" > image/etc/systemd/system/systemd-udevd.service.d/myoverride.conf
+echo "[Service]" > image/etc/systemd/system/systemd-udevd.service.d/myoverride.conf
 echo "MountFlags=shared" >> image/etc/systemd/system/systemd-udevd.service.d/myoverride.conf
+echo "PrivateMounts=no" >> image/etc/systemd/system/systemd-udevd.service.d/myoverride.conf
+
+# redirect the first USB stick to /gode/usb
+# echo "/dev/sda1        /gcode/usb   defaults     0       0" >> image/etc/fstab
 
 #
 # reporting and cleanup
