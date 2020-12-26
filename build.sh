@@ -11,7 +11,7 @@
 #
 # This script needs qemu-user-static (to run ARM binaries on x86) as well as curl and zip/unzip
 #
-apt-get install -y -q qemu-user-static curl unzip zip parted coreutils
+apt-get install -y -q qemu-user-static curl unzip zip parted coreutils hardlink
 
 #
 # Input files
@@ -110,10 +110,10 @@ chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-522.deb
 
 BROWSERS="chromium-browser chromium-browser-l10n dillo rpi-chromium-mods "
 CODECS="chromium-codecs-ffmpeg-extra ffmpeg vlc libavcodec58 libavfilter7 libavformat58 libavresample4 libavutil56 libbluray2 libcodec2-0.8.1 vlc-plugin-base vlc-plugin-* libmp3lame0  "
-PRINTING="cups gsfonts  ghostscript cups-daemon cups-common  poppler-data poppler-utils  libpoppler82 libsane cups-pk-helper system-config-printer avahi-daemon "
+PRINTING="cups gsfonts  ghostscript cups-daemon cups-common  poppler-data poppler-utils  libpoppler82 libsane cups-pk-helper system-config-printer avahi-daemon system-config-printer-common python3-cupshelpers"
 DEVTOOLS="fio gcc-8 manpages-dev libc6-dev tk8.6-blt2.5 git libc6-dbg libjs-sphinxdoc libjs-jquery libjs-underscore libraspberrypi-doc gdb dmidecode gdbm-l10n pkg-config luajit dpkg-dev "
-PYTHONMISC="pypy python-numpy"
-GUIMISC="geany geany-common gpicview realvnc-vnc-server rpd-wallpaper scrot giblib1 gtk2-engines-clearlookspix gui-pkinst libmikmod3 plymouth rpd-plym-splash v4l-utils "
+PYTHONMISC="pypy python-numpy python3-crypto python-setuptools python3-setuptools python3-gi python-cryptography python3-cryptography python3-psutil python-gi python3-picamera python-chardet python3-chardet python3-apt python3-pkg-resources python-pkg-resources"
+GUIMISC="geany geany-common gpicview realvnc-vnc-server rpd-wallpaper scrot giblib1 gtk2-engines-clearlookspix gui-pkinst libmikmod3 plymouth rpd-plym-splash v4l-utils timgm6mb-soundfont "
 DOCS="debian-reference-common debian-reference-en rp-bookshelf"
 #
 LIST="$CODECS $BROWSERS $DEVTOOLS $PRINTING $PYTHONMISC $GUIMISC $DOCS alacarte libass9 thonny   "
@@ -166,6 +166,19 @@ rm -f image/usr/bin/qemu-arm-static
 rm -f image/home/pi/Bookshelf/000_RPi_BeginnersGuide_DIGITAL.pdf
 rmdir image/tmp/discard
 
+#
+# Hardlink identical files
+#
+pushd image
+hardlink -X .
+popd
+
+#
+# zero out any empty space in the filesystem so that it zips up well
+#
+dd if=/dev/zero of=image/tmp/full &> /dev/null
+rm -f image/tmp/full 
+
 
 #
 # Now that we're done with the content of the image, time to optimize it for burning/etc
@@ -184,7 +197,7 @@ if [ ! -e NOSHRINK ]; then
 	# stop the loop device
 	losetup -d $LOOP
 	# reduce the size of the file
-	truncate $IMG2 2450M
+	truncate $IMG2 --size 2450M
 	# and re-establish the devices/mount point
 	losetup $LOOP $IMG2
 	partx $LOOP
@@ -194,7 +207,7 @@ if [ ! -e NOSHRINK ]; then
 fi
 
 #
-# zero out any empty space in the filesystem so that it zips up well
+# zero out (again) any empty space in the filesystem so that it zips up well
 #
 dd if=/dev/zero of=image/tmp/full &> /dev/null
 rm -f image/tmp/full 
