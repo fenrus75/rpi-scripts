@@ -93,6 +93,9 @@ chmod a+x image/var/lib/dpkg/info/pypy.prerm
 
 # usbmount will let us auto mount USB sticks
 chroot image apt-get install -y usbmount
+# wmctrl lets us make an application full screen
+chroot image apt-get install -y wmctrl
+
 # Samba for network shares
 DEBIAN_FRONTEND=noninteractive chroot image apt-get install -y --assume-yes samba
 # and mark some things we don't want auto-removed
@@ -159,7 +162,7 @@ echo "MountFlags=shared" >> image/etc/systemd/system/systemd-udevd.service.d/myo
 echo "PrivateMounts=no" >> image/etc/systemd/system/systemd-udevd.service.d/myoverride.conf
 
 # redirect the first USB stick to /gode/usb
-# echo "/dev/sda1        /gcode/usb   defaults     0       0" >> image/etc/fstab
+echo "/dev/sda1        /gcode/usb   vfat	user,noauto,uid=1000     0       0" >> image/etc/fstab
 
 #
 # reporting and cleanup

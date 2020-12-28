@@ -13,5 +13,15 @@ int main(int argc, char **argv)
             
         usleep(500000);
     }
-    execv("/usr/local/bin/carbidemotion", argv);    
+    if (fork() == 0) {
+        execv("/usr/local/bin/carbidemotion", argv);    
+    } else {
+        while (1) {
+            int ret;
+            ret = system("wmctrl -r \"Carbide Motion\" -b toggle,fullscreen");
+            if (ret == 0)
+                break;
+            usleep(500000);
+        }
+    }
 }
