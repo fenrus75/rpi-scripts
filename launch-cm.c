@@ -16,6 +16,7 @@ int main(int argc, char **argv)
     if (fork() == 0) {
         execv("/usr/local/bin/carbidemotion", argv);    
     } else {
+#ifdef FULLSCREEN
         while (1) {
             int ret;
             ret = system("wmctrl -r \"Carbide Motion\" -b toggle,fullscreen");
@@ -23,5 +24,6 @@ int main(int argc, char **argv)
                 break;
             usleep(500000);
         }
+#endif
     }
 }
