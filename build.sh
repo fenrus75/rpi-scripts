@@ -128,6 +128,11 @@ chroot image apt autoremove -q -y
 
 rm -rf image/usr/lib/pypy/
 
+#
+# And now we add back "arandr" since some weird displays need it
+#
+chroot image/ apt-get install -q -y arandr
+
 
 #
 # Install carbide motion
