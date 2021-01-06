@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Exec=/usr/bin/launch-cm
+Exec=/usr/bin/launch-cm --fullscreen
 Path=/gcode/
 Name=Carbide Motion (delayed launcher)
 GenericName=Carbide 3D Machine Controller

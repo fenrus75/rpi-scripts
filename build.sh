@@ -32,8 +32,8 @@ if [ ! -e $IMG ] ; then
 fi
 
 
-if [ ! -e carbidemotion-522.deb ] ; then
-	curl -O -L http://carbide3d.com/dl/pi/carbidemotion-522.deb
+if [ ! -e carbidemotion-523.deb ] ; then
+	curl -O -L https://motion-pi.us-east-1.linodeobjects.com/carbidemotion-523.deb
 fi
 
 # we need the loopback devices to support partitioned devices, so force this on
@@ -69,7 +69,7 @@ cp /usr/bin/qemu-arm-static image/usr/bin/
 
 # copy the carbide motion file into the image
 mkdir -p image/tmp/discard
-cp carbidemotion-522.deb image/tmp/discard
+cp carbidemotion-523.deb image/tmp/discard
 
 #
 # Delayed launcher so that CM does not start until the user is done configuring
@@ -104,7 +104,7 @@ chroot image apt-mark manual samba
 #
 # Install carbide motion
 #
-chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-522.deb 
+chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-523.deb 
 
 
 #
@@ -137,7 +137,7 @@ chroot image/ apt-get install -q -y arandr
 #
 # Install carbide motion
 #
-chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-522.deb 
+chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-523.deb 
 
 
 
