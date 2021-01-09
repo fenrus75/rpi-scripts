@@ -179,13 +179,6 @@ rm -f image/home/pi/Bookshelf/000_RPi_BeginnersGuide_DIGITAL.pdf
 rmdir image/tmp/discard
 
 #
-# Reporting package dependencies
-#
-chroot image ldd /usr/local/bin/carbidemotion  | cut -f3 -d" " > cm-libdeps
-for i in `cat cm-libdeps`; do chroot image dpkg -S /usr/$i ; done > cm-pkgdeps
-
-
-#
 # Hardlink identical files
 #
 pushd image
