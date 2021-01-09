@@ -23,7 +23,7 @@ LOOP=/dev/loop7
 LOOPpart=/dev/loop7p2
 # download the OS image file as zip 
 if [ ! -e $ZIP ] ; then
-	curl -L -O https://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2020-12-04/$ZIP
+	curl -L -O https://motion-pi.us-east-1.linodeobjects.com/carbidemotion-524.deb
 fi
 
 #... and unzip
@@ -32,8 +32,8 @@ if [ ! -e $IMG ] ; then
 fi
 
 
-if [ ! -e carbidemotion-523.deb ] ; then
-	curl -O -L https://motion-pi.us-east-1.linodeobjects.com/carbidemotion-523.deb
+if [ ! -e carbidemotion-524.deb ] ; then
+	curl -O -L https://motion-pi.us-east-1.linodeobjects.com/carbidemotion-524.deb
 fi
 
 # we need the loopback devices to support partitioned devices, so force this on
@@ -69,7 +69,7 @@ cp /usr/bin/qemu-arm-static image/usr/bin/
 
 # copy the carbide motion file into the image
 mkdir -p image/tmp/discard
-cp carbidemotion-523.deb image/tmp/discard
+cp carbidemotion-524.deb image/tmp/discard
 
 #
 # Delayed launcher so that CM does not start until the user is done configuring
@@ -104,7 +104,7 @@ chroot image apt-mark manual samba
 #
 # Install carbide motion
 #
-chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-523.deb 
+chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-524.deb 
 
 
 #
@@ -137,7 +137,7 @@ chroot image/ apt-get install -q -y arandr
 #
 # Install carbide motion
 #
-chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-523.deb 
+chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-524.deb 
 
 
 
@@ -177,6 +177,13 @@ rm -f image/tmp/discard/*deb
 rm -f image/usr/bin/qemu-arm-static
 rm -f image/home/pi/Bookshelf/000_RPi_BeginnersGuide_DIGITAL.pdf
 rmdir image/tmp/discard
+
+#
+# Reporting package dependencies
+#
+chroot image ldd /usr/local/bin/carbidemotion  | cut -f3 -d" " > cm-libdeps
+for i in `cat cm-libdeps`; do chroot image dpkg -S /usr/$i ; done > cm-pkgdeps
+
 
 #
 # Hardlink identical files
