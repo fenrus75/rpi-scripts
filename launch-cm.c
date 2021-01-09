@@ -21,6 +21,7 @@ static int has_touch_screen(void)
         ent = readdir(dir);
         if (!ent)
             break;
+        /* touch screens are "absolute" positioning and will have an 'abs' attribute set to 1 */
         sprintf(filename, "/sys/class/input/%s/capabilities/abs", ent->d_name);
         file = fopen(filename, "r");
         if (!file)
