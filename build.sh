@@ -114,7 +114,7 @@ chroot image/ apt-get install -q -y /tmp/discard/carbidemotion-524.deb
 BROWSERS="chromium-browser chromium-browser-l10n dillo rpi-chromium-mods "
 CODECS="chromium-codecs-ffmpeg-extra ffmpeg vlc libavcodec58 libavfilter7 libavformat58 libavresample4 libavutil56 libbluray2 libcodec2-0.8.1 vlc-plugin-base vlc-plugin-* libmp3lame0  "
 PRINTING="cups gsfonts  ghostscript cups-daemon cups-common  poppler-data poppler-utils  libpoppler82 libsane cups-pk-helper system-config-printer avahi-daemon system-config-printer-common python3-cupshelpers"
-DEVTOOLS="fio gcc-8 manpages-dev libc6-dev tk8.6-blt2.5 git libc6-dbg libjs-sphinxdoc libjs-jquery libjs-underscore libraspberrypi-doc gdb dmidecode gdbm-l10n pkg-config luajit dpkg-dev "
+DEVTOOLS="fio gcc-8 manpages-dev libc6-dev tk8.6-blt2.5 git libc6-dbg libjs-sphinxdoc libjs-jquery libjs-underscore libraspberrypi-doc gdb dmidecode gdbm-l10n pkg-config luajit dpkg-dev libmnl-dev libpigpio-dev libpigpiod-if-dev  libraspberrypi-dev "
 PYTHONMISC="pypy python-numpy python3-crypto python-setuptools python3-setuptools python3-gi python-cryptography python3-cryptography python3-psutil python-gi python3-picamera python-chardet python3-chardet python3-apt python3-pkg-resources python-pkg-resources"
 GUIMISC="geany geany-common gpicview realvnc-vnc-server rpd-wallpaper scrot giblib1 gtk2-engines-clearlookspix gui-pkinst libmikmod3 plymouth rpd-plym-splash v4l-utils timgm6mb-soundfont "
 DOCS="debian-reference-common debian-reference-en rp-bookshelf"
