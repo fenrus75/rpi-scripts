@@ -66,6 +66,7 @@ mount $LOOPpart image
 # we need "qmu-arm-static in the image for the chroots below to work
 
 cp /usr/bin/qemu-arm-static image/usr/bin/
+rm image/etc/ld.so.preload
 
 # copy the carbide motion file into the image
 mkdir -p image/tmp/discard
@@ -185,6 +186,10 @@ pushd image
 hardlink -X .
 popd
 
+#
+# Put ld.so.preload back
+#
+cp ld.so.preload image/etc
 #
 # zero out any empty space in the filesystem so that it zips up well
 #
