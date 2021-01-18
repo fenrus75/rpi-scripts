@@ -16,14 +16,14 @@ apt-get install -y -q qemu-user-static curl unzip zip parted coreutils hardlink
 #
 # Input files
 #
-ZIP=2020-12-02-raspios-buster-armhf.zip
-IMG=2020-12-02-raspios-buster-armhf.img
+ZIP=2021-01-11-raspios-buster-armhf.zip
+IMG=2021-01-11-raspios-buster-armhf.img
 IMG2=rpi-carbidemotion.img
 LOOP=/dev/loop7
 LOOPpart=/dev/loop7p2
 # download the OS image file as zip 
 if [ ! -e $ZIP ] ; then
-	curl -L -O https://motion-pi.us-east-1.linodeobjects.com/carbidemotion-524.deb
+	curl -L -O https://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2021-01-12/2021-01-11-raspios-buster-armhf.zip
 fi
 
 #... and unzip
